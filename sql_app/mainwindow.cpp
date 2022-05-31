@@ -69,13 +69,15 @@ void MainWindow::on_tableChoose_activated(int index)
         queryModel->setHeaderData(9,Qt::Horizontal,"Стаж");
         break;//JOIN employees ON employees.EmployeeID = employeeInformation.EmployeeID
     case 2:
-        queryModel->setQuery("SELECT salary.EmployeeID, FirstName, MiddleName, Wage, Premium FROM salary JOIN employees ON employees.EmployeeID = salary.EmployeeID");
+        queryModel->setQuery("SELECT salary.EmployeeID, FirstName, MiddleName, Wage, Premium, Summary FROM salary JOIN employees ON employees.EmployeeID = salary.EmployeeID");
         currentTableName = "salary";
+        ui->tableView->showColumn(4);//??
         queryModel->setHeaderData(0,Qt::Horizontal,"№ сотрудника");
         queryModel->setHeaderData(1,Qt::Horizontal,"Имя");
         queryModel->setHeaderData(2,Qt::Horizontal,"Отчество");
         queryModel->setHeaderData(3,Qt::Horizontal,"Заработная плата");
         queryModel->setHeaderData(4,Qt::Horizontal,"Премия");
+        queryModel->setHeaderData(5,Qt::Horizontal,"Сумма выплат с учётом НДФЛ");
         break;//
     case 3:
         queryModel->setQuery("SELECT * FROM departments");
