@@ -50,6 +50,8 @@ private slots:
 
     void on_buttonDelete_clicked();
 
+    void on_filterButton_clicked();
+
 private:
     Ui::MainWindow *ui;
     //QSqlTableModel* tableModel;

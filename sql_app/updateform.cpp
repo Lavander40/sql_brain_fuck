@@ -28,7 +28,94 @@ void updateform::recieveData(int table, int row)
     currentTable = table;
     currentRow = row;
     switch (table) {
-    case 0:
+    case 0 :
+    {
+        query.exec("SELECT EmployeeID, FirstName, MiddleName, Department, DepartmentName, Speciality, SpecialityName, Summary, LengthOfService FROM PersonnelOverview WHERE EmployeeID = " + QString::number(row));
+        query.next();
+
+        QLabel *FirstNameLable = new QLabel();
+        QLabel *MiddleNameLable = new QLabel();
+        QLabel *DepartmentLable = new QLabel();
+        QLabel *SpecialityLable = new QLabel();
+        //QLabel *SummaryLable = new QLabel();
+        QLabel *LengthOfServiceLable = new QLabel();
+
+        QLineEdit *FirstName = new QLineEdit();
+        QLineEdit *MiddleName = new QLineEdit();
+        //QLineEdit *Summary = new QLineEdit();
+        QLineEdit *LengthOfService = new QLineEdit();
+
+        QComboBox *Department = new QComboBox();
+        QComboBox *Speciality = new QComboBox();
+
+        FirstNameLable->setObjectName("FirstNameLable");
+        MiddleNameLable->setObjectName("MiddleNameLable");
+        DepartmentLable->setObjectName("DepartmentLable");
+        SpecialityLable->setObjectName("SpecialityLable");
+        //SummaryLable->setObjectName("SummaryLable");
+        LengthOfServiceLable->setObjectName("LengthOfServiceLable");
+
+
+        FirstNameLable->setText("Имя");
+        MiddleNameLable->setText("Отчество");
+        DepartmentLable->setText("Отдел");
+        SpecialityLable->setText("Специальность");
+        //SummaryLable->setText("Выплата");
+        LengthOfServiceLable->setText("Стаж");
+
+
+        FirstName->setObjectName("FirstName");
+        MiddleName->setObjectName("MiddleName");
+        Department->setObjectName("Department");
+        Speciality->setObjectName("Speciality");
+        //Summary->setObjectName("Summary");
+        LengthOfService->setObjectName("LengthOfService");
+
+        QSqlQuery departments;
+        departments.exec("SELECT * FROM departments");
+        while(departments.next()){
+            Department->addItem(departments.value("DepartmentID").toString() + ". " + departments.value("DepartmentName").toString());
+        }
+        QSqlQuery specialities;
+        specialities.exec("SELECT * FROM specialities");
+        while(specialities.next()){
+            Speciality->addItem(specialities.value("SpecialityID").toString() + ". " + specialities.value("SpecialityName").toString());
+        }
+
+        ui->tableLabel->setText("Изменение информации через общую форму");
+        ui->tableLayout->addWidget(FirstNameLable);
+        ui->tableLayout->addWidget(FirstName);
+        ui->tableLayout->addWidget(MiddleNameLable);
+        ui->tableLayout->addWidget(MiddleName);
+        ui->tableLayout->addWidget(DepartmentLable);
+        ui->tableLayout->addWidget(Department);
+        ui->tableLayout->addWidget(SpecialityLable);
+        ui->tableLayout->addWidget(Speciality);
+        //ui->tableLayout->addWidget(SummaryLable);
+        //ui->tableLayout->addWidget(Summary);
+        ui->tableLayout->addWidget(LengthOfServiceLable);
+        ui->tableLayout->addWidget(LengthOfService);
+
+        Department->setMaxVisibleItems(5);
+        Speciality->setMaxVisibleItems(5);
+
+        lineEdits.append(FirstName);
+        lineEdits.append(MiddleName);
+        //lineEdits.append(Summary);
+        lineEdits.append(LengthOfService);
+
+        comboBoxes.append(Department);
+        comboBoxes.append(Speciality);
+
+        FirstName->setText(query.value(1).toString());
+        MiddleName->setText(query.value(2).toString());
+        Department->setCurrentText(query.value(3).toString() + ". " + query.value(4).toString());
+        Speciality->setCurrentText(query.value(5).toString() + ". " + query.value(6).toString());
+        //Summary->setText(query.value(7).toString());
+        LengthOfService->setText(query.value(8).toString());
+        break;
+    }
+    case 1:
     {
         query.exec("SELECT FirstName, MiddleName, LastName, Sex, Age, Department, DepartmentName, Speciality, SpecialityName FROM employees JOIN departments ON DepartmentID = Department JOIN specialities ON SpecialityID = Speciality WHERE EmployeeID = " + QString::number(row));
         query.next();
@@ -104,6 +191,9 @@ void updateform::recieveData(int table, int row)
         ui->tableLayout->addWidget(SpecialityLable);
         ui->tableLayout->addWidget(Speciality);
 
+        Department->setMaxVisibleItems(5);
+        Speciality->setMaxVisibleItems(5);
+
         lineEdits.append(FirstName);
         lineEdits.append(MiddleName);
         lineEdits.append(LastName);
@@ -124,7 +214,7 @@ void updateform::recieveData(int table, int row)
         Speciality->setCurrentText(query.value(7).toString() + ". " + query.value(8).toString());
         break;
     }
-    case 1:
+    case 2:
     {
         query.exec("SELECT FirstName, MiddleName, PhoneNumber, Email, HomeAddress, ChildrenAmount, PassportID, IndividualTaxpayerNumber, LengthOfService FROM employeeInformation JOIN employees ON employees.EmployeeID = employeeInformation.EmployeeID WHERE employeeInformation.EmployeeID = " + QString::number(row));
         query.next();
@@ -202,7 +292,7 @@ void updateform::recieveData(int table, int row)
         LengthOfService->setText(query.value(8).toString());
         break;
     }
-    case 2:
+    case 3:
     {
         query.exec("SELECT FirstName, MiddleName, Wage, Premium FROM salary JOIN employees ON employees.EmployeeID = salary.EmployeeID WHERE salary.EmployeeID = " + QString::number(row));
         query.next();
@@ -235,7 +325,7 @@ void updateform::recieveData(int table, int row)
         Premium->setText(query.value(3).toString());
         break;
     }
-    case 3:
+    case 4:
     {
         query.exec("SELECT DepartmentName FROM departments WHERE DepartmentID = " + QString::number(row));
         query.next();
@@ -259,7 +349,7 @@ void updateform::recieveData(int table, int row)
         DepartmentName->setText(query.value(0).toString());
         break;
     }
-    case 4:
+    case 5:
     {
         query.exec("SELECT SpecialityName FROM specialities WHERE SpecialityID = " + QString::number(row));
         query.next();
@@ -307,25 +397,30 @@ void updateform::on_updateButton_clicked()
     switch (currentTable) {
     case 0:
     {
-        queryInsert->prepare("EXEC employeesUpdate @RowID = ?, @FirstName = ?, @MiddleName = ?, @LastName = ?, @Age = ?, @Sex = ?, @Department = ?, @Speciality = ?");
+        queryInsert->prepare("EXEC updatePersonellOverview @RowID = ?, @FirstName = ?, @MiddleName = ?, @LengthOfService = ?, @Department = ?, @Speciality = ?");
         break;
     }
     case 1:
     {
-        queryInsert->prepare("EXEC employeeInformationUpdate @RowID = ?, @PhoneNumber = ?, @Email = ?, @HomeAddress = ?, @ChildrenAmount = ?, @PassportID = ?, @IndividualTaxpayerNumber = ?, @LengthOfService = ?");
+        queryInsert->prepare("EXEC employeesUpdate @RowID = ?, @FirstName = ?, @MiddleName = ?, @LastName = ?, @Age = ?, @Sex = ?, @Department = ?, @Speciality = ?");
         break;
     }
     case 2:
     {
-        queryInsert->prepare("EXEC salaryUpdate @RowID = ?, @Wage = ?, @Premium = ?");
+        queryInsert->prepare("EXEC employeeInformationUpdate @RowID = ?, @PhoneNumber = ?, @Email = ?, @HomeAddress = ?, @ChildrenAmount = ?, @PassportID = ?, @IndividualTaxpayerNumber = ?, @LengthOfService = ?");
         break;
     }
     case 3:
     {
-        queryInsert->prepare("EXEC departmentsUpdate @RowID = ?, @DepartmentName = ?");
+        queryInsert->prepare("EXEC salaryUpdate @RowID = ?, @Wage = ?, @Premium = ?");
         break;
     }
     case 4:
+    {
+        queryInsert->prepare("EXEC departmentsUpdate @RowID = ?, @DepartmentName = ?");
+        break;
+    }
+    case 5:
     {
         queryInsert->prepare("EXEC specialitiesUpdate @RowID = ?, @SpecialityName = ?");
         break;

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1008</width>
-    <height>635</height>
+    <width>1041</width>
+    <height>609</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -19,8 +19,8 @@
      <rect>
       <x>20</x>
       <y>20</y>
-      <width>761</width>
-      <height>571</height>
+      <width>801</width>
+      <height>541</height>
      </rect>
     </property>
     <property name="sortingEnabled">
@@ -36,15 +36,20 @@
    <widget class="QComboBox" name="tableChoose">
     <property name="geometry">
      <rect>
-      <x>790</x>
+      <x>830</x>
       <y>20</y>
-      <width>211</width>
+      <width>201</width>
       <height>22</height>
      </rect>
     </property>
     <property name="placeholderText">
      <string>Выберите таблицу</string>
     </property>
+    <item>
+     <property name="text">
+      <string>Общая форма</string>
+     </property>
+    </item>
     <item>
      <property name="text">
       <string>Таблица сотрудников</string>
@@ -74,8 +79,8 @@
    <widget class="QPushButton" name="buttonUpdate">
     <property name="geometry">
      <rect>
-      <x>840</x>
-      <y>520</y>
+      <x>890</x>
+      <y>500</y>
       <width>141</width>
       <height>21</height>
      </rect>
@@ -87,8 +92,8 @@
    <widget class="QPushButton" name="buttonInsert">
     <property name="geometry">
      <rect>
-      <x>840</x>
-      <y>480</y>
+      <x>890</x>
+      <y>460</y>
       <width>141</width>
       <height>21</height>
      </rect>
@@ -100,8 +105,8 @@
    <widget class="QPushButton" name="buttonDelete">
     <property name="geometry">
      <rect>
-      <x>840</x>
-      <y>560</y>
+      <x>890</x>
+      <y>540</y>
       <width>141</width>
       <height>21</height>
      </rect>
@@ -110,13 +115,26 @@
      <string>Удалить запись</string>
     </property>
    </widget>
+   <widget class="QPushButton" name="filterButton">
+    <property name="geometry">
+     <rect>
+      <x>829</x>
+      <y>50</y>
+      <width>201</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>filter</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1008</width>
+     <width>1041</width>
      <height>20</height>
     </rect>
    </property>

@@ -27,6 +27,10 @@ void insert::recieveData(int index)
     switch (index) {
     case 0:
     {
+        break;
+    }
+    case 1:
+    {
         QLabel *FirstNameLable = new QLabel();
         QLabel *MiddleNameLable = new QLabel();
         QLabel *LastNameLable = new QLabel();
@@ -99,6 +103,9 @@ void insert::recieveData(int index)
         ui->tableLayout->addWidget(SpecialityLable);
         ui->tableLayout->addWidget(Speciality);
 
+        Department->setMaxVisibleItems(5);
+        Speciality->setMaxVisibleItems(5);
+
         lineEdits.append(FirstName);
         lineEdits.append(MiddleName);
         lineEdits.append(LastName);
@@ -110,7 +117,7 @@ void insert::recieveData(int index)
         comboBoxes.push_back(Speciality);
         break;
     }
-    case 1:
+    case 2:
     {
         QLabel *EmployeeIDLable = new QLabel();
         QLabel *PhoneNumberLable = new QLabel();
@@ -159,9 +166,9 @@ void insert::recieveData(int index)
         LengthOfService->setObjectName("LengthOfService");
 
         QSqlQuery employees;
-        employees.exec("SELECT * FROM employees");
+        employees.exec("SELECT EmployeeID, FirstName, MiddleName FROM employees WHERE EmployeeID <> ALL (SELECT EmployeeID FROM employeeInformation)");
         while(employees.next()){
-            EmployeeID->addItem(employees.value("EmployeeID").toString() + ". " + employees.value("FirstName").toString() + " " + employees.value("MiddleName").toString());
+            EmployeeID->addItem(employees.value(0).toString() + ". " + employees.value(1).toString() + " " + employees.value(2).toString());
         }
 
         ui->tableLabel->setText("Добавление информации о сотруднике");
@@ -182,6 +189,8 @@ void insert::recieveData(int index)
         ui->tableLayout->addWidget(LengthOfServiceLable);
         ui->tableLayout->addWidget(LengthOfService);
 
+        EmployeeID->setMaxVisibleItems(5);
+
         lineEdits.append(PhoneNumber);
         lineEdits.append(Email);
         lineEdits.append(HomeAddress);
@@ -193,7 +202,7 @@ void insert::recieveData(int index)
         comboBoxes.append(EmployeeID);
         break;
     }
-    case 2:
+    case 3:
     {
         QLabel *EmployeeIDLable = new QLabel();
         QLabel *WageLable = new QLabel();
@@ -217,7 +226,7 @@ void insert::recieveData(int index)
         Premium->setObjectName("Premium");
 
         QSqlQuery employees;
-        employees.exec("SELECT * FROM employees");
+        employees.exec("SELECT EmployeeID, FirstName, MiddleName FROM employees WHERE EmployeeID <> ALL (SELECT EmployeeID FROM salary)");
         while(employees.next()){
             EmployeeID->addItem(employees.value("EmployeeID").toString() + ". " + employees.value("FirstName").toString() + " " + employees.value("MiddleName").toString());
         }
@@ -230,13 +239,15 @@ void insert::recieveData(int index)
         ui->tableLayout->addWidget(PremiumLable);
         ui->tableLayout->addWidget(Premium);
 
+        EmployeeID->setMaxVisibleItems(5);
+
         comboBoxes.append(EmployeeID);
 
         lineEdits.append(Wage);
         lineEdits.append(Premium);
         break;
     }
-    case 3:
+    case 4:
     {
         QLabel *DepartmentNameLable = new QLabel();
 
@@ -255,7 +266,7 @@ void insert::recieveData(int index)
         lineEdits.append(DepartmentName);
         break;
     }
-    case 4:
+    case 5:
     {
         QLabel *SpecialityNameLable = new QLabel();
 
@@ -296,27 +307,27 @@ void insert::on_pushButton_clicked()
     QSqlQuery *queryInsert = new QSqlQuery();
 
     switch (currentTableIndex) {
-    case 0:
+    case 1:
     {
         queryInsert->prepare("EXEC employeesAdd @FirstName = ?, @MiddleName = ?, @LastName = ?, @Age = ?, @Sex = ?, @Department = ?, @Speciality = ?");
         break;
     }
-    case 1:
+    case 2:
     {
         queryInsert->prepare("EXEC employeeInformationAdd @PhoneNumber = ?, @Email = ?, @HomeAddress = ?, @ChildrenAmount = ?, @PassportID = ?, @IndividualTaxpayerNumber = ?, @LengthOfService = ?, @EmployeeID = ?");
         break;
     }
-    case 2:
+    case 3:
     {
         queryInsert->prepare("EXEC salaryAdd @Wage = ?, @Premium = ?, @EmployeeID = ?");
         break;
     }
-    case 3:
+    case 4:
     {
         queryInsert->prepare("EXEC departmentsAdd @DepartmentName = ?");
         break;
     }
-    case 4:
+    case 5:
     {
         queryInsert->prepare("EXEC specialitiesAdd @SpecialityName = ?");
         break;
