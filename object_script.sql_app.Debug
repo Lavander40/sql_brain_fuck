@@ -1,0 +1,13 @@
+debug/cursor.o
+debug/insert.o
+debug/insertform.o
+debug/login.o
+debug/main.o
+debug/mainwindow.o
+debug/updateform.o
+debug/moc_cursor.o
+debug/moc_insert.o
+debug/moc_insertform.o
+debug/moc_login.o
+debug/moc_mainwindow.o
+debug/moc_updateform.o
