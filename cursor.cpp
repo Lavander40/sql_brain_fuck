@@ -192,7 +192,7 @@ void cursor::recieveData(int table)
         comboBoxes.push_back(Department);
         comboBoxes.push_back(Speciality);
 
-        query.exec("DECLARE employeesCur CURSOR SCROLL FOR SELECT * FROM employees OPEN employeesCur");
+        query.exec("DECLARE employeesCur CURSOR SCROLL FOR SELECT EmployeeID, FirstName, MiddleName, LastName, Age, Sex, CASE Sex WHEN 0 THEN 'Ж' ELSE 'М' END AS SexName, Department, DepartmentName, Speciality, SpecialityName FROM employees JOIN departments ON DepartmentID = Department JOIN specialities ON SpecialityID = Speciality OPEN employeesCur");
         break;
     }
     case 2:
@@ -369,12 +369,12 @@ void cursor::fill_from(int table, int movement){
     switch (table) {
     case 0:
     {
-        queryCursor.exec("DECLARE @EmployeeID INT, @FirstName NVARCHAR(40), @MiddleName NVARCHAR(40), @Department INT, @DepartmentName NVARCHAR(40), @Speciality INT, @SpecialityName NVARCHAR(40), @Summary INT, @LengthOfService INT FETCH ABSOLUTE " + QString::number(movement) + " FROM viewCur INTO @EmployeeID, @FirstName, @MiddleName, @Department, @DepartmentName, @Speciality, @SpecialityName, @Summary, @LengthOfService SELECT @EmployeeID, @FirstName, @MiddleName, @LengthOfService, @Department, @Speciality");
+        queryCursor.exec("DECLARE @EmployeeID INT, @FirstName NVARCHAR(40), @MiddleName NVARCHAR(40), @Department INT, @DepartmentName NVARCHAR(40), @Speciality INT, @SpecialityName NVARCHAR(40), @Summary INT, @LengthOfService INT FETCH ABSOLUTE " + QString::number(movement) + " FROM viewCur INTO @EmployeeID, @FirstName, @MiddleName, @Department, @DepartmentName, @Speciality, @SpecialityName, @Summary, @LengthOfService SELECT @EmployeeID, @FirstName, @MiddleName, @LengthOfService, @Department, @DepartmentName, @Speciality, @SpecialityName");
         break;
     }
     case 1:
     {
-        queryCursor.exec("DECLARE @EmployeeID INT, @FirstName NVARCHAR(40), @MiddleName NVARCHAR(40), @LastName NVARCHAR(40), @Sex BIT, @Age INT, @Department INT, @Speciality INT FETCH ABSOLUTE " + QString::number(movement) + " FROM employeesCur INTO @EmployeeID, @FirstName, @MiddleName, @LastName, @Sex, @Age, @Department, @Speciality SELECT @EmployeeID, @FirstName, @MiddleName, @LastName, @Sex, @Age, @Department, @Speciality");
+        queryCursor.exec("DECLARE @EmployeeID INT, @FirstName NVARCHAR(40), @MiddleName NVARCHAR(40), @LastName NVARCHAR(40), @Age INT, @Sex BIT, @SexName NVARCHAR(1), @Department INT, @DepartmentName NVARCHAR(40), @Speciality INT, @SpecialityName NVARCHAR(40) FETCH ABSOLUTE " + QString::number(movement) + " FROM employeesCur INTO @EmployeeID, @FirstName, @MiddleName, @LastName, @Age, @Sex, @SexName, @Department, @DepartmentName, @Speciality, @SpecialityName SELECT @EmployeeID, @FirstName, @MiddleName, @LastName, @Age, @Sex, @SexName, @Department, @DepartmentName, @Speciality, @SpecialityName");
         break;
     }
     case 2:
@@ -407,8 +407,8 @@ void cursor::fill_from(int table, int movement){
         i++;
     }
     foreach(QComboBox* line,comboBoxes){
-        line->setCurrentText(queryCursor.value(i).toString());
-        i++;
+        line->setCurrentText(queryCursor.value(i).toString() + ". " + queryCursor.value(i+1).toString());
+        i+=2;
     }
 }
 
@@ -430,8 +430,7 @@ void cursor::on_updateButton_clicked()
     switch (currentTableCur) {
     case 0:
     {
-        if(QMessageBox::warning(this,"Внимание","Подтвердить изменение?",QMessageBox::Cancel | QMessageBox::Ok)==QMessageBox::Ok) answer = " COMMIT TRANSACTION";
-        else answer = " ROLLBACK TRANSACTION";
+        //if(QMessageBox::warning(this,"Внимание","Подтвердить изменение?",QMessageBox::Cancel | QMessageBox::Ok)==QMessageBox::Ok) answer = " COMMIT TRANSACTION";
         queryInsert->prepare("BEGIN TRANSACTION EXEC PersonnelOverviewUpdate @RowID = ?, @FirstName = ?, @MiddleName = ?, @LengthOfService = ?, @Department = ?, @Speciality = ?" + answer);
         break;
     }
@@ -479,7 +478,11 @@ void cursor::on_updateButton_clicked()
     }
 
     if(queryInsert->exec()) QMessageBox::about(this,"","Запись была успешно обновлена");
-    else {QMessageBox::warning(this,"","Ошибка<br>Запись не была обновлена,<br>проверьте правильность введённых данных");}
+    else {
+        if(currentTableCur==0) {if(QMessageBox::warning(this,"Внимание","Подтвердить изменение?",QMessageBox::Cancel | QMessageBox::Ok)==QMessageBox::Ok) queryInsert->exec("COMMIT");
+        else{ queryInsert->exec("ROLLBACK");}}
+        else QMessageBox::warning(this,"","Ошибка<br>Запись не была обновлена,<br>проверьте правильность введённых данных");
+    }
 
     emit refreshTable(currentTableCur);
 }

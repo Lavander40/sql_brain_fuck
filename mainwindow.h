@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QSqlQueryModel>
+#include <QSqlQuery>
 #include "login.h"
 #include "ui_login.h"
 #include "insert.h"
@@ -58,7 +59,6 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
-    //QSqlTableModel* tableModel;
     QSqlQueryModel* queryModel;
 };
 #endif // MAINWINDOW_H

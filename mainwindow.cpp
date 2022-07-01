@@ -42,6 +42,7 @@ int currentRowID = 0;
 void MainWindow::on_tableChoose_activated(int index)
 {
     queryModel = new QSqlQueryModel();
+    QSqlQuery query;
 
     ui->tableView->showColumn(0);
     ui->tableView->showColumn(3);
@@ -49,9 +50,10 @@ void MainWindow::on_tableChoose_activated(int index)
     ui->tableView->showColumn(5);
     ui->buttonInsert->setEnabled(true);
     ui->buttonUpdate->setEnabled(true);
-    //ui->buttonCursor->setEnabled(true);
     ui->buttonDelete->setEnabled(true);
+    ui->buttonCursor->setEnabled(true);
     ui->filterButton->hide();
+    ui->employeeAll->hide();
     currentTableID = index;
     switch (index) {
     case 0:
@@ -72,7 +74,7 @@ void MainWindow::on_tableChoose_activated(int index)
         break;
     case 1:
         queryModel->setQuery("SELECT EmployeeID, FirstName, MiddleName, LastName, CASE Sex WHEN 0 THEN 'Ж' ELSE 'М' END AS SexName, Age, DepartmentName, SpecialityName FROM employees JOIN departments ON DepartmentID = Department JOIN specialities ON SpecialityID = Speciality");
-        currentTableName = "employees";//CASE
+        currentTableName = "employees";
         ui->filterButton->show();
         ui->filterButton->setText("Показать ФИО работников из IT");
         queryModel->setHeaderData(1,Qt::Horizontal,"Имя");
@@ -83,15 +85,12 @@ void MainWindow::on_tableChoose_activated(int index)
         queryModel->setHeaderData(6,Qt::Horizontal,"Отдел");
         queryModel->setHeaderData(7,Qt::Horizontal,"Специальность");
         ui->tableView->hideColumn(0);
-        //ui->tableView->hideColumn(4);
-        break;//
+        break;
     case 2:
         queryModel->setQuery("SELECT EmployeeID, (SELECT LastName FROM employees WHERE employees.EmployeeID = employeeInformation.EmployeeID) AS employee, PhoneNumber, Email, HomeAddress, ChildrenAmount, PassportID, IndividualTaxpayerNumber, LengthOfService FROM employeeInformation");
-        currentTableName = "employeeInformation";//Коррелированный подзапрос 1
+        currentTableName = "employeeInformation";
         queryModel->setHeaderData(0,Qt::Horizontal,"№");
         queryModel->setHeaderData(1,Qt::Horizontal,"Фамилия\nсотрудника");
-        //queryModel->setHeaderData(1,Qt::Horizontal,"Имя");
-        //queryModel->setHeaderData(2,Qt::Horizontal,"Отчество");
         queryModel->setHeaderData(2,Qt::Horizontal,"Номер телефона");
         queryModel->setHeaderData(3,Qt::Horizontal,"Электрнная почта");
         queryModel->setHeaderData(4,Qt::Horizontal,"Домашний адрес");
@@ -101,28 +100,29 @@ void MainWindow::on_tableChoose_activated(int index)
         queryModel->setHeaderData(8,Qt::Horizontal,"Стаж");
         break;
     case 3:
-        //SELECT salary.EmployeeID, FirstName, MiddleName, Wage, Premium, Summary FROM salary JOIN employees ON employees.EmployeeID = salary.EmployeeID
         queryModel->setQuery("SELECT EmployeeID, (SELECT LastName FROM employees  WHERE employees.EmployeeID = salary.EmployeeID) AS employee, Wage, Premium, Summary  FROM salary");
-        currentTableName = "salary";//Коррелированный подзапрос 2
+        currentTableName = "salary";
         ui->filterButton->show();
+        ui->employeeAll->show();
         ui->filterButton->setText("Процент выплат от общей");
         queryModel->setHeaderData(0,Qt::Horizontal,"№");
         queryModel->setHeaderData(1,Qt::Horizontal,"Фамилия\nсотрудника");
-        //queryModel->setHeaderData(1,Qt::Horizontal,"Имя");
-        //queryModel->setHeaderData(2,Qt::Horizontal,"Отчество");
         queryModel->setHeaderData(2,Qt::Horizontal,"Заработная плата");
         queryModel->setHeaderData(3,Qt::Horizontal,"Премия");
         queryModel->setHeaderData(4,Qt::Horizontal,"Сумма выплат\nс учётом НДФЛ");
-        break;//
+        query.exec("SELECT FirstName, MiddleName FROM employees, salary WHERE employees.EmployeeID = salary.EmployeeID AND Summary >= ALL (Select Summary from salary)");
+        query.next();
+        ui->employeeAll->setText(query.value("FirstName").toString() + " " + query.value("MiddleName").toString() + "<br> - самый оплачиваемый<br>работник предприятия");
+        break;
     case 4:
         queryModel->setQuery("SELECT DepartmentID, DepartmentName, (SELECT COUNT(*) FROM employees WHERE DepartmentID = Department) AS EmpCount FROM departments");
-        currentTableName = "departments";//Коррелированный подзапрос 3
+        currentTableName = "departments";
         ui->filterButton->show();
-        ui->filterButton->setText("Отделы с сред. возр. выше стредн.");
+        ui->filterButton->setText("Отделы с сред. возр. выше средн.");
         queryModel->setHeaderData(1,Qt::Horizontal,"Название отдела");
         queryModel->setHeaderData(2,Qt::Horizontal,"Количество\nработников");
         ui->tableView->hideColumn(0);
-        break;//
+        break;
     case 5:
         queryModel->setQuery("SELECT * FROM specialities");
         currentTableName = "specialities";
@@ -188,6 +188,7 @@ void MainWindow::on_filterButton_clicked()
 {
     queryModel = new QSqlQueryModel();
     ui->filterButton->hide();
+    ui->employeeAll->hide();
     ui->tableView->showColumn(0);
     ui->tableView->showColumn(3);
     ui->tableView->showColumn(4);
@@ -195,11 +196,11 @@ void MainWindow::on_filterButton_clicked()
     ui->buttonInsert->setDisabled(true);
     ui->buttonUpdate->setDisabled(true);
     ui->buttonDelete->setDisabled(true);
+    ui->buttonCursor->setDisabled(true);
 
     switch (currentTableID) {
     case 0:
         queryModel->setQuery("SELECT * FROM PersonnelOverview WHERE EmployeeID IN (SELECT EmployeeID FROM employeeInformation WHERE ChildrenAmount>2)");
-        //currentTableName = "employees";//подзапрос where
         queryModel->setHeaderData(0,Qt::Horizontal,"№ сотр.");
         queryModel->setHeaderData(1,Qt::Horizontal,"Имя");
         queryModel->setHeaderData(7,Qt::Horizontal,"Фамилия");
@@ -209,30 +210,26 @@ void MainWindow::on_filterButton_clicked()
         queryModel->setHeaderData(4,Qt::Horizontal,"Отдел");
         ui->tableView->hideColumn(5);
         queryModel->setHeaderData(6,Qt::Horizontal,"Специальность");
-
         break;
     case 1:
         queryModel->setQuery("SELECT FirstName, MiddleName, LastName FROM employees WHERE Department = ANY (SELECT DepartmentID FROM departments WHERE DepartmentName LIKE '%IT%')");
-        //currentTableName = "employees";//подзапрос any
         queryModel->setHeaderData(1,Qt::Horizontal,"Имя");
         queryModel->setHeaderData(2,Qt::Horizontal,"Отчество");
         queryModel->setHeaderData(3,Qt::Horizontal,"Фамилия");
         break;
     case 3:
         queryModel->setQuery("SELECT * FROM dbo.PercentSalary()");
-        //currentTableName = "employees";//скалярная и векторная функции
         queryModel->setHeaderData(0,Qt::Horizontal,"Имя");
         queryModel->setHeaderData(1,Qt::Horizontal,"Отчество");
         queryModel->setHeaderData(2,Qt::Horizontal,"Процент");
         break;
     case 4:
         queryModel->setQuery("SELECT DepartmentName, AVG(Age) AS AvgAge FROM (SELECT DepartmentName, Age FROM departments,employees WHERE Department = DepartmentID) AS employee GROUP BY DepartmentName HAVING Avg(Age)>(SELECT avg(age) FROM employees)");
-        queryModel->setHeaderData(0,Qt::Horizontal,"Отдел");//много всего FROM
+        queryModel->setHeaderData(0,Qt::Horizontal,"Отдел");
         queryModel->setHeaderData(1,Qt::Horizontal,"Средний\nвозраст");
         break;
     case 5:
         queryModel->setQuery("SELECT SpecialityName, AVG(Summary) AS AvgSalary from employees JOIN salary ON salary.EmployeeID = employees.EmployeeID FULL JOIN specialities ON specialities.SpecialityID = employees.Speciality group by SpecialityName HAVING AVG(Summary) is not null");
-        //currentTableName = "employees";//having
         queryModel->setHeaderData(0,Qt::Horizontal,"Специальность");
         queryModel->setHeaderData(1,Qt::Horizontal,"Средняя\nвыплата");
         break;

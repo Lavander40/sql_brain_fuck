@@ -18,8 +18,8 @@ login::login(QWidget *parent) :
 //    ui->dbaddress->setCompleter(completerAddr);
 //    ui->dbname->setCompleter(completerDB);
 
-    ui->name->setText("HeadAdmin");
-    ui->password->setText("admin2020");
+//ui->name->setText("HeadAdmin");
+//ui->password->setText("admin2020");
 }
 
 login::~login()

@@ -393,14 +393,12 @@ void updateform::clearWidgets(){
 void updateform::on_updateButton_clicked()
 {
     QSqlQuery *queryInsert = new QSqlQuery();
-    QString answer;
 
     switch (currentTable) {
     case 0:
     {
-        if(QMessageBox::warning(this,"Внимание","Подтвердить изменение?",QMessageBox::Cancel | QMessageBox::Ok)==QMessageBox::Ok) answer = " COMMIT TRANSACTION";
-        else answer = " ROLLBACK TRANSACTION";
-        queryInsert->prepare("BEGIN TRANSACTION EXEC PersonnelOverviewUpdate @RowID = ?, @FirstName = ?, @MiddleName = ?, @LengthOfService = ?, @Department = ?, @Speciality = ?" + answer);
+
+        queryInsert->prepare("BEGIN TRANSACTION EXEC PersonnelOverviewUpdate @RowID = ?, @FirstName = ?, @MiddleName = ?, @LengthOfService = ?, @Department = ?, @Speciality = ?");
         break;
     }
     case 1:
@@ -447,7 +445,11 @@ void updateform::on_updateButton_clicked()
     }
 
     if(queryInsert->exec()) QMessageBox::about(this,"","Запись была успешно обновлена");
-    else {QMessageBox::warning(this,"","Ошибка<br>Запись не была обновлена,<br>проверьте правильность введённых данных");}
+    else {
+        if(currentTable==0) {if(QMessageBox::warning(this,"Внимание","Подтвердить изменение?",QMessageBox::Cancel | QMessageBox::Ok)==QMessageBox::Ok) queryInsert->exec("COMMIT");
+        else{ queryInsert->exec("ROLLBACK");}}
+        else QMessageBox::warning(this,"","Ошибка<br>Запись не была обновлена,<br>проверьте правильность введённых данных");
+    }
 
     emit refreshTable(currentTable);
 
